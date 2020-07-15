@@ -91,6 +91,10 @@ this.MEM_SYMBOLS = {
     "KBD" : 24576,
 }
 
+this.LINE_SYMBOLS = {
+    
+}
+
 
 
 /** Function to remove white space,
@@ -149,13 +153,26 @@ this.removeWhiteSpace = function (line_array) {
 
 
  this.parseAllCommands = function(commands) {
-    return commands.map((command) => {
-        if (command.includes('@')) {
-            return this.parseACommand(command);
+    // try changing the order in which commands are completed 
+    let new_commands = [];
+
+    for (let i=0; i<commands.length; i++) {
+        if (commands[i].includes('@')) {
+            new_commands.push(this.parseACommand(commands[i]));
         } else {
-            return this.parseCCommand(command);
+            new_commands.push(this.parseCCommand(commands[i]));
         }
-    })
+    }   
+    return new_commands;
+
+
+    // return commands.map((command) => {
+    //     if (command.includes('@')) {
+    //         return this.parseACommand(command);
+    //     } else {
+    //         return this.parseCCommand(command);
+    //     }
+    // })
  }
 
 
@@ -298,25 +315,39 @@ this.parseJumpSymbols = function(command_lines) {
  */
 
  this.getOpenRegister = function() {
-     // get last 10 used registers
-    let used_registers = Object.values(this.MEM_SYMBOLS).slice(this.MEM_SYMBOLS.length-10, this.MEM_SYMBOLS.length);
-    used_registers = used_registers.filter((val) => {
-        // get a list of the 
-        if (val < this.MEM_SYMBOLS['SCREEN']) {
-            return val;
-        }
-    }).sort((a, b) => {
-        // make sure it is sorted, ascending
-        if(a < b) {
-            return;
-        }
-    });
+    
+    let new_reg;
 
-    let new_reg = used_registers[used_registers.length - 1] + 1;
+    for (let i=16; i< this.MEM_SYMBOLS['SCREEN']; i++) {
+        if (Object.values(this.MEM_SYMBOLS).includes(i)) {
+            continue;
+        } else {
+            new_reg = i;
+            break
+        }
+    }   
+    
+    //  // get last 10 used registers
+    // let used_registers = Object.values(this.MEM_SYMBOLS);
+    // used_registers = used_registers.filter((val) => {
+    //     // get a list of the 
+    //     if (Number(val) < Number(this.MEM_SYMBOLS['SCREEN'])) {
+    //         return Number(val);
+    //     }
+    // }).sort((a, b) => {
+    //     // make sure it is sorted, ascending
+    //     if(a < b) {
+    //         return;
+    //     }
+    // });
 
-    if (new_reg >  this.MEM_SYMBOLS['SCREEN']) { // condition that i is greater than the value of SCREEN, in that case you are out of memory
-      throw new Error(`Sorry, the memory address ${this.MEM_SYMBOLS['SCREEN']} is allocaed for the screen. If you have tried to assign to it, then you are out of memory.`);
-    }
+
+
+    // let new_reg = used_registers[used_registers.length - 1] + 1;
+
+    // if (new_reg >  this.MEM_SYMBOLS['SCREEN']) { // condition that i is greater than the value of SCREEN, in that case you are out of memory
+    //   throw new Error(`Sorry, the memory address ${this.MEM_SYMBOLS['SCREEN']} is allocaed for the screen. If you have tried to assign to it, then you are out of memory.`);
+    // }
 
     // return one larger than the last element
     return new_reg;

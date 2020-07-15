@@ -38,14 +38,16 @@ const assembleFile = function(file_name) {
     f = cleanFile(f);
     console.log("Cleaned file");
 
-    f = parseJumpSymbols(f);
-    console.log("Parsed Jump symbols.");
-
     f = removeWhiteSpace(f);
     console.log("Removed White Space");
 
+    f = parseJumpSymbols(f);
+    console.log("Parsed Jump symbols.");
+
     let assembled_code = parseAllCommands(f);
     console.log("Assembled code");
+
+    console.log(this.MEM_SYMBOLS);
 
 
     return assembled_code;
