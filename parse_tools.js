@@ -193,7 +193,7 @@ this.parseACommand = function(a_command) {
             return this.parseACommand(`@${this.MEM_SYMBOLS[a_command]}`)
         } else { // find a new register for the symbol and assign it, if not already existent
             this.MEM_SYMBOLS[a_command] = this.getOpenRegister();
-            return this.parseACommand(`@${this.MEM_SYMBOLS[a_command]}`);
+            return this.parseACommand(`@${a_command}`);
         }
     }
 
@@ -298,18 +298,28 @@ this.parseJumpSymbols = function(command_lines) {
  */
 
  this.getOpenRegister = function() {
-    while(i=15, i++) {
-        // condition that the register is already taken
-        if (Object.values(MEM_SYMBOLS).includes(i)) {
-            continue;
-        } else if (i == this.MEM_SYMBOLS['SCREEN']) { // condition that i is greater than the value of SCREEN, in that case you are out of memory
-            throw new Error(`Sorry, the memory address ${this.MEM_SYMBOLS['SCREEN']} is allocaed for the screen. If you have tried to assign to it, then you are out of memory.`);
-            break;
-        } else { // condition that the register is available
-            return i;
-            break;
+     // get last 10 used registers
+    let used_registers = Object.values(this.MEM_SYMBOLS).slice(this.MEM_SYMBOLS.length-10, this.MEM_SYMBOLS.length);
+    used_registers = used_registers.filter((val) => {
+        // get a list of the 
+        if (val < this.MEM_SYMBOLS['SCREEN']) {
+            return val;
         }
+    }).sort((a, b) => {
+        // make sure it is sorted, ascending
+        if(a < b) {
+            return;
+        }
+    });
+
+    let new_reg = used_registers[used_registers.length - 1] + 1;
+
+    if (new_reg >  this.MEM_SYMBOLS['SCREEN']) { // condition that i is greater than the value of SCREEN, in that case you are out of memory
+      throw new Error(`Sorry, the memory address ${this.MEM_SYMBOLS['SCREEN']} is allocaed for the screen. If you have tried to assign to it, then you are out of memory.`);
     }
+
+    // return one larger than the last element
+    return new_reg;
  }
 }
 
