@@ -92,7 +92,7 @@ this.MEM_SYMBOLS = {
 }
 
 this.LINE_SYMBOLS = {
-    
+
 }
 
 
@@ -208,7 +208,10 @@ this.parseACommand = function(a_command) {
     } else { // handles the A command if it is a symbol
         if (Object.keys(this.MEM_SYMBOLS).includes(a_command)) {
             return this.parseACommand(`@${this.MEM_SYMBOLS[a_command]}`)
-        } else { // find a new register for the symbol and assign it, if not already existent
+        } else if (Object.keys(this.LINE_SYMBOLS).includes(a_command)) {
+            return this.parseACommand(`@${this.LINE_SYMBOLS[a_command]}`);
+        } 
+        else { // find a new register for the symbol and assign it, if not already existent
             this.MEM_SYMBOLS[a_command] = this.getOpenRegister();
             return this.parseACommand(`@${a_command}`);
         }
@@ -270,35 +273,32 @@ this.parseCCommand = function(c_command) {
 
 this.parseJumpSymbols = function(command_lines) {
     
-    // keep track of which lines are symbol lines
-    let symbol_lines = [];
+    // parse through 'command_lines' and, for each one that is a jump symbole
+    //  create an object: symbol, target, where target is the line it references
+    let symbols = [];
 
     // get all symbols from lines, add to MEM_SYMBOLS
+
+    let line_count = 0;
+    let new_commands = [];
+
     command_lines.forEach((line) => {
         if (line.includes('(')) { // handles case where line is a symbol identification
             let i1 = line.indexOf('(');
             let i2 = line.indexOf(')');
             symbol = line.slice(i1 + 1, i2);
+
             // append index of line to symbol lines 
-            symbol_lines.push(command_lines.indexOf(line));
-            // add the symbol and its value to MEM_SYMBOLS
-            this.MEM_SYMBOLS[symbol] = command_lines.indexOf(line);
+            this.LINE_SYMBOLS[symbol] = line_count;
             return;
         } else { // normal lines
+            line_count++;
+            new_commands.push(line);
             return;
         }
     });
 
-    let new_command_lines = [];
-    for (let i=0; i <command_lines.length; i++) {
-        if (symbol_lines.includes(i)) {
-            continue;
-        } else {
-            new_command_lines.push(command_lines[i]);
-        }
-    }
-
-    return new_command_lines;
+    return new_commands;
 
 }
 
